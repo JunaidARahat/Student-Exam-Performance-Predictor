@@ -10,4 +10,5 @@ dill
 seaborn
 matplotlib
 catboost 
+statsmodels
 -e .

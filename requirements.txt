@@ -1,0 +1,12 @@
+numpy
+Flask
+gunicorn
+scikit-learn
+pandas
+dnspython
+pymongo
+PyYAML
+dill
+matplotlib
+catboost 
+-e .

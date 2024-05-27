@@ -11,4 +11,5 @@ seaborn
 matplotlib
 catboost 
 statsmodels
+xgboost
 -e .

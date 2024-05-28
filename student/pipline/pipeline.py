@@ -8,13 +8,14 @@ from threading import Thread
 from typing import List
 
 from multiprocessing import Process
-from student.entity.artifact_entity import DataIngestionArtifact,ModelEvaluationArtifact
+from student.entity.artifact_entity import DataIngestionArtifact,ModelEvaluationArtifact,ModelPusherArtifact
 from student.entity.artifact_entity import DataValidationArtifact,DataTransformationArtifact,ModelTrainerArtifact
 from student.components.data_ingestion import DataIngestion
 from student.components.data_validation import DataValidation
 from student.components.data_transformation import DataTransformation
 from student.components.model_trainer import ModelTrainer
 from student.components.model_evaluation import ModelEvaluation
+from student.components.model_pusher import ModelPusher
 
 
 import os, sys
@@ -89,6 +90,17 @@ class Pipeline(Thread):
             return model_eval.initiate_model_evaluation()
         except Exception as e:
             raise StudentException(e, sys) from e
+    
+
+    def start_model_pusher(self, model_eval_artifact: ModelEvaluationArtifact) -> ModelPusherArtifact:
+        try:
+            model_pusher = ModelPusher(
+                model_pusher_config=self.config.get_model_pusher_config(),
+                model_evaluation_artifact=model_eval_artifact
+            )
+            return model_pusher.initiate_model_pusher()
+        except Exception as e:
+            raise StudentException(e, sys) from e
 
         
     
@@ -102,6 +114,17 @@ class Pipeline(Thread):
                 data_validation_artifact=data_validation_artifact
             )
             model_trainer_artifact = self.start_model_trainer(data_transformation_artifact=data_transformation_artifact)
+
+            model_evaluation_artifact = self.start_model_evaluation(data_ingestion_artifact=data_ingestion_artifact,
+                                                                    data_validation_artifact=data_validation_artifact,
+                                                                    model_trainer_artifact=model_trainer_artifact)
+
+            if model_evaluation_artifact.is_model_accepted:
+                model_pusher_artifact = self.start_model_pusher(model_eval_artifact=model_evaluation_artifact)
+                logging.info(f'Model pusher artifact: {model_pusher_artifact}')
+            else:
+                logging.info("Trained model rejected.")
+            logging.info("Pipeline completed.")
     
         except Exception as e:
           raise StudentException(e, sys) from e

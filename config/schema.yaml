@@ -1,0 +1,24 @@
+FileName: "StudentsPerformance.csv"
+NumberofColumns: 8
+ColumnNames:
+  gender: category
+  race/ethnicity : category
+  parental level of education : category
+  lunch: category
+  test preparation course: category
+  math score : int
+  reading score : int
+  writing score : int
+
+Numerical_columns:
+  - writing score
+  - reading score
+
+Categorical_columns:
+  - gender
+  - race/ethnicity
+  - parental level of education
+  - lunch
+  - test preparation course
+
+target_column: math score

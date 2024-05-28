@@ -46,13 +46,13 @@ python app.py
 
 ## Work flows
 
--config.yaml after constant
--config_entity
--artifact_entity
--update the configuration manager in config
--component
--pipeline
--app.py / demo.py
+* config.yaml after constant
+* config_entity
+* artifact_entity
+* update the configuration manager in config
+* component
+*pipeline
+* app.py / demo.py
 
 ## Models Used
 * Linear Regression

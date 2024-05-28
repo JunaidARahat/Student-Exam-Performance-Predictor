@@ -1,0 +1,27 @@
+grid_search:
+  class: GridSearchCV
+  module: sklearn.model_selection
+  params:
+    cv: 5
+    verbose: 2
+model_selection:
+  module_0:
+    class: CatBoostRegressor
+    module: catboost
+    params:
+      learning_rate: 0.1
+    search_param_grid:
+      learning_rate:
+      - 0.1
+      - 0.01
+      - 0.02
+      - 0.06
+  module_1:
+    class: LinearRegression
+    module: sklearn.linear_model
+    params:
+      fit_intercept: True
+    search_param_grid:
+      fit_intercept:
+      - True
+      - False

@@ -9,22 +9,25 @@ from typing import List
 
 from multiprocessing import Process
 from student.entity.artifact_entity import DataIngestionArtifact
-from student.entity.artifact_entity import DataValidationArtifact,DataTransformationArtifact
+from student.entity.artifact_entity import DataValidationArtifact,DataTransformationArtifact,ModelTrainerArtifact
 from student.components.data_ingestion import DataIngestion
 from student.components.data_validation import DataValidation
 from student.components.data_transformation import DataTransformation
-
+from student.components.model_trainer import ModelTrainer
 
 
 import os, sys
 from collections import namedtuple
 from datetime import datetime
 import pandas as pd
+from student.constants import EXPERIMENT_DIR_NAME, EXPERIMENT_FILE_NAME
+
+
 
 
 
 class Pipeline(Thread):
-
+    
     def __init__(self, config: Configuartion) -> None:
         try:
             os.makedirs(config.training_pipeline_config.artifact_dir, exist_ok=True)
@@ -63,18 +66,28 @@ class Pipeline(Thread):
             return data_transformation.initiate_data_transformation()
         except Exception as e:
             raise StudentException(e, sys)
+    
+    def start_model_trainer(self, data_transformation_artifact: DataTransformationArtifact) -> ModelTrainerArtifact:
+        try:
+            model_trainer = ModelTrainer(model_trainer_config=self.config.get_model_trainer_config(),
+                                         data_transformation_artifact=data_transformation_artifact
+                                         )
+            return model_trainer.initiate_model_trainer()
+        except Exception as e:
+            raise StudentException(e, sys) from e
+
         
     
     def run_pipeline(self):
         try:
+            
             data_ingestion_artifact = self.start_data_ingestion()
             data_validation_artifact = self.start_data_validation(data_ingestion_artifact=data_ingestion_artifact)
-            
             data_transformation_artifact = self.start_data_transformation(
                 data_ingestion_artifact=data_ingestion_artifact,
                 data_validation_artifact=data_validation_artifact
             )
-
+            model_trainer_artifact = self.start_model_trainer(data_transformation_artifact=data_transformation_artifact)
     
         except Exception as e:
           raise StudentException(e, sys) from e
@@ -86,3 +99,6 @@ class Pipeline(Thread):
             self.run_pipeline()
         except Exception as e:
             raise e
+        
+    
+    
